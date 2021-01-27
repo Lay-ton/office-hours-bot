@@ -1,17 +1,22 @@
 import os
 
 import discord
+import redditstockscan as rscan
+import helpers
+import keys
+import asyncio
 
-TOKEN = os.getenv('DISCORD_TOKEN')
-GUILD = os.getenv('DISCORD_GUILD')
+TOKEN = keys.DISCORDTOKEN
 
 client = discord.Client()
 
 
-commands = {
-    '!help': 'Lists all commands I can perform.',
-    '!scanstocks': 'Scans for tickers on a specified subreddit. Parameters: \{subreddit\} '
-}
+commands = [
+    '!help: Lists all commands I can perform.\n',
+    '!scanstocks: Scans for tickers on a specified subreddit. Parameters: \{subreddit\}\n'
+]
+
+answer = asyncio.Future()
 
 
 @client.event
@@ -27,21 +32,18 @@ async def on_message(message):
         subreddit = "wallstreetbets"
         postType = "hot"
         time = "day"
-        comments = "n"
-        desc = "n"
+        comments = False
+        desc = False
+        size = 100
 
         if len(command) == 1:
             subreddit = "wallstreetbets"
-            postType = "hot"
-            time = "day"
-            comments = "y"
-            desc = "y"
+            comments = True
+            desc = True
         elif len(command) == 2:
             subreddit = command[1]
-            postType = "hot"
-            time = "day"
-            comments = "y"
-            desc = "y"
+            comments = True
+            desc = True
         else:
             for item in command[2:]:
                 if item in postTypes:
@@ -49,12 +51,28 @@ async def on_message(message):
                 elif item in times:
                     time = item
                 elif item == 'comments':
-                    comments = "y"
+                    comments = True
                 elif item == 'desc':
-                    desc = "y"
+                    desc = True
+                elif helpers.RepInt(item):
+                    size = int(item)
 
-        await message.channel.send(response)
+        # answer.set_result(rscan.runRedditScanner(
+        #     subreddit, postType, time, comments, desc, size))
+
+        # while not answer.result():
+        #     print("Sleeping")
+        #     await asyncio.sleep(10)
+
+        answer = rscan.runRedditScanner(
+            subreddit, postType, time, comments, desc, size)
+        for response in answer:
+            await message.channel.send(response)
     elif command[0] == '!help':
+
+        response = ""
+        for item in commands:
+            response += item
         await message.channel.send(response)
 
 client.run(TOKEN)

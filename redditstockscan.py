@@ -4,6 +4,7 @@ import csv
 import math
 import keys
 import tickers
+import helpers
 from praw.models import MoreComments
 
 
@@ -58,82 +59,69 @@ def processComments(reddit, post, mapOfStocks, allStocks, i):
         addStocks(comment.body, mapOfStocks, allStocks, i)
 
 
-# The reddit object which allows us to communicate with Reddit
-reddit = praw.Reddit(client_id=APPID, client_secret=APPSECRET, password=password,
-                     user_agent='stock-scanner-script by ' + username, username=username)
+def runRedditScanner(subreddit, postType, time, comments, desc, size):
 
-# Ask the user what subreddits they want to go through
-subreddits = []
-print("Enter the subreddit/subreddits you want to index then enter done to indicate a finish: ")
-sr = ""
-while sr != "done":
-    sr = str(input())
-    subreddits.append(sr)
+    debug = f"{subreddit} {postType} {time} {comments} {desc} {size}"
+    print(debug)
 
-# Get information like time, post types, number of posts
-print("Enter the type of posts you want (Ex: top, hot, controversial, new, rising)")
-postType = str(input())
-print("Enter the time limit of the posts you want to grab (Ex: hour, day, week, month, year, all): ")
-time = str(input())
-print("Enter the number of posts you want to grab from each subreddit (max = 100): ")
-numberOfPosts = int(input())
+    # The reddit object which allows us to communicate with Reddit
+    reddit = praw.Reddit(client_id=APPID, client_secret=APPSECRET, password=password,
+                         user_agent='stock-scanner-script by ' + username, username=username)
 
-# Does the user want to take the description and comments into account
-print("Do you want to use the descriptions as well? (y/n): ")
-useDescriptionAnswer = str(input())
-useDescription = False
-if useDescriptionAnswer == "y" or useDescriptionAnswer == "Y":
-    useDescription = True
-print("Do you want to use comments as well? (y/n): ")
-useCommentsAns = str(input())
-useComments = False
-if useCommentsAns == 'Y' or useCommentsAns == 'y':
-    useComments = True
+    # Creates a map and gets all tickers from nasdaq ftp directory
+    mapOfStocks = {}
+    allStocks = tickers.getNasdaqTickers()
 
-# Creates a map and gets all tickers from nasdaq ftp directory
-mapOfStocks = {}
-allStocks = tickers.getNasdaqTickers()
-
-# Go through the subreddits and get the data
-for s in subreddits:
+    # Go through the subreddits and get the data
     posts = None
-    subreddit = reddit.subreddit(s)
+    subreddit = reddit.subreddit(subreddit)
     # get the posts based on the postTypes the user wants and the number they want.
     if postType == "hot":
-        posts = subreddit.hot(limit=numberOfPosts)
+        posts = subreddit.hot(limit=size)
     elif postType == "top":
-        posts = subreddit.top(limit=numberOfPosts, time_filter=time)
+        posts = subreddit.top(limit=size, time_filter=time)
     elif postType == "controversial":
-        posts = subreddit.controversial(limit=numberOfPosts, time_filter=time)
+        posts = subreddit.controversial(
+            limit=size, time_filter=time)
     elif postType == "new":
-        posts = subreddit.new(limit=numberOfPosts)
+        posts = subreddit.new(limit=size)
     else:
-        posts = subreddit.rising(limit=numberOfPosts)
+        posts = subreddit.rising(limit=size)
 
     i = 0
     # Go through each post and process the title. Do description and comments if necessary.
     for post in posts:
         addStocks(post.title, mapOfStocks, allStocks, i)
         # Process the description
-        if useDescription:
+        if desc:
             addStocks(post.selftext, mapOfStocks, allStocks, i)
         # Process the comments for the post
-        if useComments:
+        if comments:
             processComments(reddit, post, mapOfStocks, allStocks, i)
         i = i + 1
 
-# Sort the values of the mapofstocks and go through and print all of them in order
-sortedVals = sorted(mapOfStocks.values())
-seen = {}
+    # Sort the values of the mapofstocks and go through and print all of them in order
+    sortedVals = sorted(mapOfStocks.values(), reverse=True)
+    seen = {}
 
-# initialize the seen array
-for key in mapOfStocks.keys():
-    seen.update({key: False})
-
-# Go through the sortedVals and print every ticker along with its value in order
-for i in sortedVals:
+    # initialize the seen array
     for key in mapOfStocks.keys():
-        if mapOfStocks.get(key) == i and seen.get(key) == False:
-            print(key + ": " + str(i))
-            seen.update({key: True})
-            break
+        seen.update({key: False})
+
+    response = f"Here are the results:\n"
+
+    # Go through the sortedVals and print every ticker along with its value in order
+    for i in sortedVals[:20]:
+        for key in mapOfStocks.keys():
+            if mapOfStocks.get(key) == i and seen.get(key) == False:
+                print(key + ": " + str(i))
+                a_str = f"{key}: {str(i)}\n"
+                response += a_str
+                seen.update({key: True})
+                break
+
+    print(response)
+    print(len(response))
+    results = helpers.chop(response)
+
+    return results
