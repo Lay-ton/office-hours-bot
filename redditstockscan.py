@@ -22,7 +22,10 @@ filter_words = {
     'MOON', 'BE', 'AT', 'CAN', 'GO', 'OR', 'SO', 
     'JUST', 'WANT', 'IS', 'DO', 'HOW', 'DUDE', 'BRO',
     'LOVE', 'ONE', 'NOW', 'BY', 'HAS', 'OUT', 'SEE', 
-    'OUT', 'YOLO', 'BIG', 'ANY', 'AM', 'DD', 'HE'
+    'OUT', 'YOLO', 'BIG', 'ANY', 'AM', 'DD', 'HE',
+    'RH', 'TD', 'NEXT', 'MAN', 'NEW', 'MUST', 'E',
+    'FUND', 'AN', 'BEST', 'GOOD', 'EOD', 'THE', 'TO',
+    'OF', 'AND', 'HAVE', 'NOT'
     }
 
 
