@@ -16,6 +16,13 @@ password = keys.REDDITPASS
 APPID = keys.APPID
 APPSECRET = keys.APPSECRET
 
+# Avoid counting these words
+filter_words = {
+    'HOLD', 'A', 'ARE', 'FOR', 'ON', 'IT', 'ALL', 
+    'MOON', 'BE', 'AT', 'CAN', 'GO', 'OR', 'SO', 
+    'JUST', 'WANT', 'IS', 'DO', 'HOW', 'DUDE', 'BRO'
+    }
+
 
 # This function needs to add any stock tickers seen in sentnce into into the mapOfStocks
 # sentence- The sentence that needs to parsed which possibly contains any stock tickers
@@ -37,7 +44,8 @@ def addStocks(sentence, mapOfStocks, allstocks, rank):
         if word[0:1] == "$":
             newWord = word[1:]
         # If the word is a ticker then add it to the mapOfStocks
-        if allstocks.get(newWord) != None:
+        is_filter_word = (newWord in filter_words) or (newWord.upper() in filter_words)
+        if allstocks.get(newWord) != None and not is_filter_word:
             if mapOfStocks.get(newWord) == None:
                 mapOfStocks.update({newWord: newRank})
             else:
