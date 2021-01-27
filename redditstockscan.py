@@ -20,7 +20,9 @@ APPSECRET = keys.APPSECRET
 filter_words = {
     'HOLD', 'A', 'ARE', 'FOR', 'ON', 'IT', 'ALL', 
     'MOON', 'BE', 'AT', 'CAN', 'GO', 'OR', 'SO', 
-    'JUST', 'WANT', 'IS', 'DO', 'HOW', 'DUDE', 'BRO'
+    'JUST', 'WANT', 'IS', 'DO', 'HOW', 'DUDE', 'BRO',
+    'LOVE', 'ONE', 'NOW', 'BY', 'HAS', 'OUT', 'SEE', 
+    'OUT', 'YOLO', 'BIG', 'ANY', 'AM', 'DD', 'HE'
     }
 
 
