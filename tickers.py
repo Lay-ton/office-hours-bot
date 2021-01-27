@@ -50,7 +50,7 @@ def retTickers(file_name):
 
 
 def checkFileExists(file_name):
-    if os.path.isfile(file_name):
+    if os.path.isfile(f"{file_name}.txt"):
         # Read the header of the processed ticker file to get mod time of last retrieval
         processed = open(f"{file_name}.txt", 'r')
         stored_time = processed.readline().rstrip()
@@ -85,7 +85,7 @@ def getNasdaqTickers():
     files = ["nasdaqlisted", "otherlisted"]
 
     for file_name in files:
-        checkFileExists(f"{file_name}.txt")
+        checkFileExists(file_name)
         processed = open(f"{file_name}.txt", 'r')
         processed.readline()
         for line in processed:
